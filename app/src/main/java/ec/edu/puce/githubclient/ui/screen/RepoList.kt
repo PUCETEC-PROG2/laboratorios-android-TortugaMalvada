@@ -1,41 +1,70 @@
 package ec.edu.puce.githubclient.ui.screen
-import androidx.compose.foundation.layout.Column
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ec.edu.puce.githubclient.ui.components.Repoitem
+import ec.edu.puce.githubclient.viewmodels.RepoListViewModel
 
 @Composable
-fun RepoList () {
-    Column (
-        modifier = Modifier
-            .padding(horizontal = 4.dp, vertical = 48.dp)
-    ){
-        Repoitem(
-            name = "Tortuga Malvada",
-            description= "Una tortuga llena de maldad",
-            avatarIng = "https://media.istockphoto.com/id/172912400/es/foto/tortuga-mordedora-enojado-primer-plano.jpg?s=1024x1024&w=is&k=20&c=DHp3HJQewcdII-2o2bakiNPTJ2LPhSdmxtlGLmanbLo=",
-            language = "Python"
-        )
-        Repoitem(
-            name = "Tortuga Bondadosa",
-            description= "Una tortuga llena de bondad",
-            avatarIng = "https://zoo.cordoba.es/wp-content/uploads/2022/01/tortugablan-1200x832.jpg",
-            language = "Java"
-        )
-        Repoitem(
-            name = "Tortuga Ingenua",
-            description= "Una tortuga llena de ingenuidad",
-            avatarIng = "https://thumbs.dreamstime.com/b/clísico-de-tortuga-perro-kawaii-carapace-vida-marina-ingenua-dibujada-mano-ilustración-linda-anfibios-en-peligro-extinción-171615749.jpg?w=768",
-            language = "Kotlin"
-        )
+fun RepoList(
+    modifier: Modifier = Modifier,
+    viewModel: RepoListViewModel = viewModel()
+) {
 
+    val repos by viewModel.repos.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMsg by viewModel.errorMsg.collectAsState()
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = modifier.align(Alignment.Center)
+            )
+        }
+
+        errorMsg?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(all = 16.dp)
+            )
+        }
+
+        if (!isLoading && errorMsg == null) {
+
+            LazyColumn(
+                modifier = modifier.fillMaxSize()
+            ) {
+
+                items(repos) { repo ->
+                    Repoitem(repository = repo)
+                }
+            }
+        }
     }
 }
-@Preview (showBackground = true)
+
+@Preview(showBackground = true)
 @Composable
-fun Item () {
+fun Item() {
     RepoList()
 }
